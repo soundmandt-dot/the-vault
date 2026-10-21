@@ -460,7 +460,9 @@
 
   /* ============ engines: two, picked automatically ============
      gpu — WebLLM with a ~1B model; needs WebGPU.
-     cpu — transformers.js on WASM with a sub-1B model; runs nearly anywhere.
+     cpu — transformers.js on WASM with the same Llama 1B; runs nearly
+     anywhere, slower. Llama is the floor on every rung (2026-10-21 hotfix:
+     the 0.5B fallback answered everything with a refusal, so it was cut).
      dev — hidden bench hook only: #dev=http://localhost:1234 (LM Studio).
            No UI, not a product feature.
      iPhones and low-memory devices start on cpu — a big model can crash
@@ -474,10 +476,10 @@
   const TF_PINNED     = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1/dist/transformers.web.min.js";
   const ORT_LOCAL     = "./lib/";
   const ORT_PINNED    = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.0-dev.20260914-8d85527a0/dist/";
-  const GPU_MODELS = ["Llama-3.2-1B-Instruct-q4f16_1-MLC", "Qwen2.5-0.5B-Instruct-q4f16_1-MLC"];
+  const GPU_MODELS = ["Llama-3.2-1B-Instruct-q4f16_1-MLC"];
   let GPU_SIZE = "about 800 MB";
-  const CPU_MODEL = "onnx-community/Qwen2.5-0.5B-Instruct";
-  const CPU_SIZE = "about 400 MB";
+  const CPU_MODEL = "onnx-community/Llama-3.2-1B-Instruct-ONNX";
+  const CPU_SIZE = "about 1.1 GB";
 
   const devMatch = /#dev=([^&\s]+)/.exec(location.hash || "");
   const DEV_URL = devMatch ? decodeURIComponent(devMatch[1]).replace(/\/+$/, "") : null;
@@ -580,13 +582,13 @@
       tf.env.backends.onnx.wasm.wasmPaths = localLib ? ORT_LOCAL : ORT_PINNED;
     }catch(e){}
     const gen = await tf.pipeline("text-generation", CPU_MODEL, {
-      dtype: "q4",
+      dtype: "q4f16",
       progress_callback: (p) => {
         if (onPct && p && p.status === "progress" && p.total) onPct(Math.round(100 * p.loaded / p.total));
       }
     });
     const tok = gen.tokenizer;
-    return { model: "Qwen2.5-0.5B (CPU)", chat: async (msgs, temp) => {
+    return { model: "Llama-3.2-1B (CPU)", chat: async (msgs, temp) => {
       const prompt = tok.apply_chat_template(msgs, {tokenize: false, add_generation_prompt: true});
       const out = await gen(prompt, {max_new_tokens: 240, temperature: temp, do_sample: true, repetition_penalty: 1.1});
       let txt = (out && out[0] && out[0].generated_text) || "";
