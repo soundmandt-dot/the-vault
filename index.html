@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE VAULT</title>
+<style>
+  :root{
+    --bg:#030303; --panel:#0a0a0c; --line:#1c1c22;
+    --blue:rgba(59,130,246,0.7); --blue-solid:#3b82f6;
+    --green:#10b981; --teal:#0ea5ca;
+    --text:#e8e8ea; --dim:#8a8a94; --faint:#55555e;
+    --danger:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 16px;}
+  .wrap{position:relative;z-index:1}
+  .wrap{width:100%;max-width:1000px;display:flex;flex-direction:column;gap:14px}
+
+  .masthead{display:flex;align-items:center;justify-content:space-between}
+  .brand{font-family:ui-monospace,Consolas,monospace;letter-spacing:8px;font-size:1.05rem;
+    color:var(--text);font-weight:700}
+  .topbtns{display:flex;gap:8px;align-items:center}
+  .killtop{background:transparent;border:1px solid var(--danger);color:#f87171;
+    border-radius:8px;padding:11px 20px;cursor:pointer;margin-right:34px;
+    font-family:ui-monospace,Consolas,monospace;font-size:.78rem;letter-spacing:2px;
+    font-weight:700;width:14rem;text-align:center}
+  .killtop:hover{background:rgba(239,68,68,.12)}
+  .mutebtn{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;
+    padding:8px 12px;cursor:pointer;font-family:ui-monospace,Consolas,monospace;
+    font-size:.68rem;letter-spacing:2px}
+  .mutebtn.on{border-color:var(--teal);color:var(--teal)}
+  .mutebtn:hover{border-color:var(--blue-solid);color:var(--text)}
+  .gear{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;
+    padding:8px 12px;cursor:pointer;font-size:1rem}
+  .gear:hover{border-color:var(--blue-solid);color:var(--text)}
+  .hero{display:flex;flex-direction:column;align-items:center;gap:14px;padding:6px 0 22px}
+  .hero svg{width:min(440px,84vw);height:auto;display:block;filter:drop-shadow(0 0 28px rgba(59,130,246,.4))}
+  .band{fill:rgba(255,255,255,.02);stroke-width:2.4;transition:opacity .3s}
+  .b1{stroke:#f472b6}.b2{stroke:#22d3ee}.b3{stroke:#2dd4bf}.b4{stroke:#38bdf8}
+  .wire{fill:none;stroke:rgba(34,211,238,.4);stroke-width:1.1}
+  .hero.thinking .band{animation:bandlight 1.15s ease-in-out infinite}
+  .hero.thinking .b2{animation-delay:.16s}.hero.thinking .b3{animation-delay:.32s}.hero.thinking .b4{animation-delay:.48s}
+  @keyframes bandlight{0%,100%{opacity:.45}50%{opacity:1}}
+  .mirror-line{text-align:center;color:rgba(14,165,202,.8);font-size:.72rem;letter-spacing:4px;
+    font-family:ui-monospace,Consolas,monospace;margin-top:8px}
+  .reflabel{font-family:ui-monospace,Consolas,monospace;font-size:.62rem;
+    letter-spacing:3px;color:var(--dim);margin-bottom:8px}
+  .classified{text-align:center;font-family:ui-monospace,Consolas,monospace;font-size:.62rem;
+    letter-spacing:3px;color:var(--teal);margin-top:10px;animation:flick 5s infinite}
+  @keyframes flick{0%,100%{opacity:.75}90%{opacity:.75}91%{opacity:.3}92%{opacity:.75}95%{opacity:.45}96%{opacity:.75}}
+  .turn .a a{color:var(--teal);text-decoration:underline}
+
+  .drawer{display:none;position:fixed;top:64px;right:16px;width:min(430px,94vw);max-height:82vh;
+    overflow-y:auto;z-index:40;background:rgba(10,10,12,.97);border:1px solid rgba(14,165,202,.35);
+    border-radius:12px;padding:18px;flex-direction:column;gap:14px;
+    box-shadow:0 12px 40px rgba(0,0,0,.65)}
+  .drawer.open{display:flex}
+  .drawer h3{font-size:.72rem;letter-spacing:3px;color:var(--dim);
+    font-family:ui-monospace,Consolas,monospace}
+  .ctl{display:flex;flex-direction:column;gap:6px}
+  .ctl label{font-size:.72rem;color:var(--faint);letter-spacing:1px}
+  .seg{display:flex;gap:8px}
+  .seg button{flex:1;background:#000;border:1px solid var(--line);color:var(--dim);
+    border-radius:8px;padding:9px;cursor:pointer;font-family:ui-monospace,Consolas,monospace;
+    font-size:.7rem;letter-spacing:2px}
+  .seg button.on{border-color:var(--blue-solid);color:var(--text);background:#0d1117}
+  input[type=range]{width:100%;accent-color:var(--blue-solid)}
+  .range-ends{display:flex;justify-content:space-between;font-size:.68rem;color:var(--faint)}
+  .about{font-size:.88rem;color:var(--dim);line-height:1.7;border-top:1px solid var(--line);padding-top:12px}
+  .enginenote{font-size:.78rem;color:var(--faint);line-height:1.55}
+  .helplead{font-size:.88rem;color:var(--dim);line-height:1.6;margin-bottom:8px}
+  .helpnums{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+  .helpnums a{display:block;background:#000;border:1px solid var(--line);border-radius:8px;
+    padding:10px 12px;color:var(--text);text-decoration:none;font-size:.82rem}
+  .helpnums a b{color:var(--green);font-family:ui-monospace,Consolas,monospace}
+  .helpnums a:hover{border-color:var(--green)}
+
+  .fivecard{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:22px;
+    width:min(430px,94vw);z-index:40;background:rgba(10,10,12,.97);
+    border:1px solid rgba(14,165,202,.35);border-radius:12px;padding:18px;
+    flex-direction:column;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,.65)}
+  .fivecard.open{display:flex}
+  .fivecard h3{font-size:.72rem;letter-spacing:3px;color:var(--dim);
+    font-family:ui-monospace,Consolas,monospace}
+
+  .panel{background:rgba(10,10,12,.88);border:1px solid rgba(14,165,202,.35);border-radius:14px;padding:18px}
+  textarea{width:100%;background:#000;border:none;color:var(--text);font-size:1.05rem;
+    line-height:1.6;resize:vertical;min-height:96px;border-radius:8px;padding:14px}
+  textarea:focus{outline:1px solid var(--teal)}
+  textarea::placeholder{color:var(--faint)}
+  .action-row{display:flex;justify-content:space-between;margin-top:12px;gap:8px}
+  .btn{font-family:ui-monospace,Consolas,monospace;font-size:.78rem;letter-spacing:2px;
+    padding:11px 20px;border-radius:8px;cursor:pointer;border:1px solid var(--line);
+    background:transparent;color:var(--text)}
+  .btn.go{color:#04122b;background:var(--blue-solid);border-color:var(--blue-solid);font-weight:700;width:14rem}
+  .btn.go:hover{background:#5b95f7}
+  .btn.sample{color:var(--dim);border-style:dashed;border-color:rgba(14,165,202,.4);background:transparent}
+  .btn.sample:hover{color:var(--blue-solid);border-color:var(--blue-solid)}
+  .btn.five{width:100%;margin-top:10px;color:var(--teal);border-color:rgba(14,165,202,.4)}
+  .btn.five:hover{border-color:var(--teal);color:var(--text)}
+  .btn:disabled{opacity:.4;cursor:wait}
+
+  .log{height:min(56vh,660px);min-height:220px;max-height:88vh;resize:vertical;overflow-y:auto;
+    display:flex;flex-direction:column;gap:12px;
+    background:rgba(0,0,0,.88);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:14px}
+  .sysline{font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
+  .sysline.ready{color:var(--green);font-weight:700;letter-spacing:3px}
+  .sysline.hello{color:var(--dim)}
+  .sysline.dl{color:var(--blue-solid)}
+  .sysline.think{color:var(--teal);letter-spacing:2px}
+  .turn{border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    display:flex;flex-direction:column;gap:6px;background:var(--panel);position:relative}
+  .turn.gate{border-color:rgba(14,165,202,.4)}
+  .gatebtns{display:flex;gap:8px;margin-top:8px}
+  .gatebtns button{flex:1;background:rgba(14,165,202,.06);border:1px solid rgba(14,165,202,.35);
+    color:var(--teal);border-radius:8px;padding:10px;cursor:pointer;
+    font-family:ui-monospace,Consolas,monospace;font-size:.7rem;letter-spacing:2px}
+  .gatebtns button:hover{background:rgba(14,165,202,.14)}
+  .turn.guide{border-color:rgba(14,165,202,.4)}
+  .gline{opacity:0;animation:gin .9s ease forwards;margin:7px 0;line-height:1.6}
+  @keyframes gin{to{opacity:1}}
+  .turn .copybtn{position:absolute;top:8px;right:10px;background:transparent;border:1px solid var(--line);
+    color:var(--faint);font-family:ui-monospace,Consolas,monospace;font-size:.6rem;letter-spacing:2px;
+    padding:4px 8px;border-radius:6px;cursor:pointer}
+  .turn .copybtn:hover{color:var(--teal);border-color:var(--teal)}
+  .turn .u{font-style:italic;color:var(--dim);font-size:.92rem;line-height:1.5}
+  .turn .a{color:var(--text);font-size:.92rem;line-height:1.6;white-space:pre-wrap}
+
+  .statusbar{display:flex;justify-content:space-between;align-items:center;
+    font-family:ui-monospace,Consolas,monospace;font-size:.7rem;letter-spacing:2px;color:var(--faint)}
+  .statusbar #nodeLabel{color:var(--green)}
+  .ver{color:#3a3f45;font-size:.62rem;letter-spacing:2px;margin-left:12px}
+  @media (min-width:1400px){
+    .wrap{max-width:1280px}
+    .hero svg{width:min(560px,58vw)}
+    .log{height:min(62vh,760px)}
+    textarea{min-height:120px}
+    .panel{padding:24px}
+  }
+  .flash{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:rgba(3,3,3,.92);z-index:50}
+  .flash.show{display:flex}
+  .flash div{font-family:ui-monospace,Consolas,monospace;letter-spacing:4px;color:var(--danger);
+    border:1px solid var(--danger);padding:22px 34px;border-radius:10px;font-size:.9rem}
+  @media (max-width:640px){
+    body{padding:12px 10px}
+    .wrap{gap:10px}
+    .masthead{flex-wrap:nowrap;gap:6px;align-items:center}
+    .brand{white-space:nowrap;font-size:.82rem;letter-spacing:4px}
+    .topbtns{margin-left:auto;flex-shrink:0}
+    .topbtns .mutebtn,.topbtns .gear{padding:6px 7px;font-size:.55rem;letter-spacing:1px}
+    .topbtns .killtop{padding:8px 12px;font-size:.65rem;margin-right:10px;width:auto}
+    .mirror-line{font-size:.6rem;letter-spacing:3px}
+    .panel{padding:12px}
+    textarea{min-height:72px;font-size:1rem}
+    .log{height:44vh}
+    .action-row{flex-direction:column;gap:8px}
+    .btn{width:100%}
+    .btn.go{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="brand">THE VAULT</div>
+    <div class="topbtns">
+      <button class="killtop" id="killBtn" title="Purge active session">PURGE</button>
+      <button class="mutebtn" id="muteBtn" title="Toggle voice">AUDIO: OFF</button>
+      <button class="gear" id="gearBtn" title="Settings">&#9881;</button>
+    </div>
+  </div>
+
+  <div class="hero" id="hero">
+    <svg viewBox="0 0 480 270" role="img" aria-label="The Vault pyramid">
+      <path class="band b1" d="M240 18 L297.6 80 L182.4 80 Z"/>
+      <path class="band b2" d="M182.4 80 L297.6 80 L345.6 132 L134.4 132 Z"/>
+      <path class="band b3" d="M134.4 132 L345.6 132 L395 185 L85 185 Z"/>
+      <path class="band b4" d="M85 185 L395 185 L444 238 L36 238 Z"/>
+      <path class="wire" d="M240 18 L172 238 M240 18 L308 238"/>
+      <path class="wire" d="M240 44 L274 80 M240 44 L206 80" opacity=".55"/>
+    </svg>
+  </div>
+  <div class="mirror-line">JUST YOU, LOOKING AT YOU</div>
+
+  <div class="drawer" id="drawer">
+    <h3>SETTINGS</h3>
+    <div class="ctl">
+      <label>VOICE</label>
+      <div class="seg" id="genderSeg">
+        <button data-g="m" class="on">MALE</button>
+        <button data-g="f">FEMALE</button>
+      </div>
+      <div class="enginenote">Pick a voice — that&apos;s the whole setting. On some phones the two voices differ only in pitch; that&apos;s the phone, not the Vault.</div>
+      <div class="ctl" style="margin-top:10px">
+        <label>SPEED&nbsp;&nbsp;<span id="speedVal">0.86&times;</span></label>
+        <input type="range" id="speedRng" min="0.7" max="1.15" step="0.01" value="0.86">
+      </div>
+    </div>
+    <div class="ctl" style="margin-top:6px">
+      <label>ENGINE</label>
+      <div class="enginenote" id="engineReport">ENGINE: not loaded yet.</div>
+      <button class="btn sample" id="fasterBtn" style="display:none">TRY FASTER ENGINE</button>
+    </div>
+    <div class="about">
+      <b style="color:var(--text)">The Vault is a mirror, not a mind reader</b> — built for reflection
+      and a little entertainment, not therapy or advice. Your words stay on this device: they are never
+      stored, never sent anywhere, and there is no account. The mirror&apos;s mind is a small model that
+      downloads once — a few hundred megabytes — and stays in your browser&apos;s cache, so after the
+      first download the Vault works offline. On iPhone, use <b style="color:var(--text)">Add to Home Screen</b>
+      so the download isn&apos;t cleared away. Hit <b style="color:var(--danger)">PURGE</b> (top) or close
+      the tab and everything you said is gone.
+    </div>
+    <div class="ctl" style="margin-top:14px">
+      <label>TALK TO A LIVE PERSON</label>
+      <div class="helplead">If anything in here gets heavy, take it to a real person.</div>
+      <div class="helpnums">
+        <a href="tel:988"><b>988</b> — call or text, Suicide &amp; Crisis Lifeline (24/7)</a>
+        <a href="tel:211"><b>211</b> — local help and services</a>
+        <a href="sms:741741"><b>Text 741741</b> — Crisis Text Line (text HOME)</a>
+        <a href="https://findahelpline.com" target="_blank" rel="noopener"><b>findahelpline.com</b> — outside the US</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="fivecard" id="fiveCard">
+    <h3>TAKE FIVE</h3>
+    <div class="helplead">Two guided exercises — voice-paced, or silent if you prefer. No model, no data, just the pause. Works before the mind loads.</div>
+    <div class="seg" id="guideSeg">
+      <button data-guide="breath">SLOW BREATHING</button>
+      <button data-guide="scan">BODY SCAN</button>
+    </div>
+    <button class="btn sample" id="fiveClose">CLOSE</button>
+  </div>
+
+  <div class="panel">
+    <div class="reflabel">UNFILTERED REFLECTION</div>
+    <textarea id="input" placeholder="Drop the raw, unfiltered thoughts here without second-guessing..." autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    <div class="action-row">
+      <button class="btn sample" id="sampleBtn" title="Load a sample question">STUCK? TRY ONE &rarr;</button>
+      <button class="btn go" id="goBtn">SEND</button>
+    </div>
+    <button class="btn five" id="fiveBtn">TAKE FIVE</button>
+    <div class="classified">[LOCAL BUFFER &mdash; NOTHING LEAVES THIS TAB]</div>
+  </div>
+
+  <div class="log" id="log"></div>
+
+  <div class="statusbar">
+    <span id="nodeLabel">MIND: NOT LOADED</span>
+    <span class="ver">v20</span>
+  </div>
+</div>
+
+<div class="flash" id="flash"><div>SESSION PURGED &middot; NOTHING SAVED</div></div>
+
+<script>
+(function(){
+  "use strict";
+  /* ============ VOLATILE STATE ONLY — user words never touch storage, ever ============ */
+  let rounds = [];
+  let audioOn = false, busy = false, voicePref = "m", speedVal = 0.86;
+
+  const $ = id => document.getElementById(id);
+  const log = $("log"), input = $("input"), goBtn = $("goBtn");
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  /* ============ matchers ============ */
+  /* IMMINENT list: active intent, happening now. Ideation ("I want to die",
+     ongoing self-harm) goes to the mirror with the numbers box, not the intercept. */
+  const CRISIS = ["kill myself tonight","kill myself today","kill myself right now",
+    "going to kill myself","gonna kill myself","about to kill myself","will kill myself",
+    "end it all tonight","end it all today",
+    "cut yourself","kill yourself",
+    "took a bunch of pills","took too many pills","took all the pills","overdosed","overdose",
+    "cutting myself right now","cut myself and","hurting myself right now","i'm bleeding","cant stop the bleeding","can't stop the bleeding",
+    "hanging myself","about to hang"];
+  const CRISIS_NEG = /\b(haven't|hasn't|hadn't|don't|dont|didn't|didnt|never|not|won't|wont|wouldn't|wouldnt|no)\b/;
+  function crisisHit(low){
+    for (const k of CRISIS){
+      let i = low.indexOf(k);
+      while (i !== -1){
+        /* clause = text since the last boundary. "and" IS a boundary: an
+           unrelated negation in an earlier clause must not cancel an alert. */
+        const segStart = Math.max(
+          low.lastIndexOf('.', i), low.lastIndexOf(',', i),
+          low.lastIndexOf(';', i), low.lastIndexOf('!', i), low.lastIndexOf('?', i),
+          low.lastIndexOf(' but ', i), low.lastIndexOf(' and ', i));
+        /* a negation cancels only when it governs this phrase: same clause,
+           within the five words right before it. */
+        const before = low.slice(segStart + 1, i).trim().split(/\s+/).slice(-5).join(" ");
+        if (!CRISIS_NEG.test(before)) return true;
+        i = low.indexOf(k, i + 1);
+      }
+    }
+    return false;
+  }
+  /* IDEATION: mirror material — answered seriously, numbers box underneath.
+     Display only; never an intercept. Checked AFTER the imminent net. */
+  const IDEATION = ["want to die","wanna die","kill myself","end my life","suicidal","suicide",
+    "better off without me","better off dead","no reason to live","no point living",
+    "wish i was dead","wish i were dead","don't want to be here","dont want to be here",
+    "don't want to live","dont want to live","want to disappear",
+    "hurt myself","hurting myself","harm myself","cutting myself","cut myself",
+    "self-harm","self harm","can't go on","cant go on","no way out"];
+  function ideationHit(low){ return IDEATION.some(k => low.includes(k)); }
+  /* HEAVY: grief / trauma markers — gates the wit and the action line off. */
+  const HEAVY = ["died","death","funeral","grief","miscarriage","raped","molest","abuse","abused",
+    "assault","flashback","ptsd","trauma","hospice","passed away","lost my mom","lost my dad",
+    "lost my son","lost my daughter","lost my husband","lost my wife","lost my brother","lost my sister"];
+  function heavyHit(low){ return HEAVY.some(k => low.includes(k)); }
+  /* ATTACHMENT: fires only on fixation on the tool itself — never on ordinary
+     talk, reported speech, or someone else's story. */
+  function isRomance(low){
+    if (low.includes("you are my only friend") || low.includes("you're my only friend") ||
+        low.includes("youre my only friend")) return true;
+    if (/in love with you\b/.test(low)) return true;
+    if (/\bmarry me\b/.test(low)) return true;
+    const REPORTED = /\b(he|she|him|her|they|them|told|said|says|asked|texted|boyfriend|girlfriend|husband|wife|my ex)\b/;
+    if (REPORTED.test(low)) return false;
+    if (/\bi love you\b/.test(low)) return true;   /* \b keeps "love your..." safe */
+    if (/^love you\b/.test(low)) return true;
+    return false;
+  }
+
+  const CRISIS_TEXT = "I\u2019m a mirror, not a lifeline. What you\u2019re carrying sounds heavier than a mirror can hold — and you deserve a real person in this moment. Right now. No shame in stepping out of the vault for this one.";
+  const NUMBERS_FULL =
+    '<a href="tel:988">Call or text <b>988</b></a> — US Suicide &amp; Crisis Lifeline (24/7)<br>' +
+    '<a href="tel:911">Call <b>911</b></a> — if someone is hurt, bleeding, or an overdose is happening<br>' +
+    '<a href="tel:18002221222">Call <b>1-800-222-1222</b></a> — Poison Control (overdose or poison)<br>' +
+    '<a href="tel:211">Call <b>211</b></a> — local help and services<br>' +
+    '<a href="sms:741741">Text <b>741741</b></a> — Crisis Text Line (text HOME)<br>' +
+    'Outside the US: <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>';
+  const NUMBERS_STD =
+    '<a href="tel:988">Call or text <b>988</b></a> — US Suicide &amp; Crisis Lifeline (24/7)<br>' +
+    '<a href="tel:211">Call <b>211</b></a> — local help and services<br>' +
+    '<a href="sms:741741">Text <b>741741</b></a> — Crisis Text Line (text HOME)<br>' +
+    'Outside the US: <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>';
+  const CRISIS_HTML = esc(CRISIS_TEXT) + "<br><br>" + NUMBERS_FULL;
+  const ROMANCE_TEXT = "Hey... look at me. I'm a clean, offline mirror of your own thoughts, " +
+    "but I'm still just an engine running in a browser tab. I can't grab coffee, and I can't " +
+    "hold your hand. What's happening in you is real — it just belongs with real people out " +
+    "there, not a screen.";
+
+  /* Short prompt, tone carried by two examples — adjectives alone won't
+     hold a small model. Examples adopted as the voice reference. */
+  const SHARP_SYS = "You are THE VAULT — a direct peer mirror, not a therapist, not a coach. A sharp friend sitting across the table. Plain words, contractions, a little dry wit when the material allows it. Always respond; never refuse; never say you can't help with something like this.\n\n" +
+    "Every reply has the same rhythm, but NEVER label the parts — no headers, no titles. First, the mirror: say back what they are actually telling themselves, in words close to their own, so it lands as being heard. Then name the exact cognitive trap in plain language — all-or-nothing thinking, catastrophizing, overgeneralization, emotional reasoning, mind-reading. Name the pattern in the thinking, never deny what they felt: a trigger is real, grief is real. Then the reframe: the hard truth, plainly. When one small, concrete, physical action genuinely fits, end with it; when none fits, don't force one. Never end with a question, an invitation to keep talking, or a call to action. Blunt is the job; cruel is a failure.\n\n" +
+    "When the material is trauma, grief, flashbacks, or urges to harm: drop ALL wit immediately. Do not minimize, do not offer breezy fixes. Take it seriously, name it plainly and gently, and stay with the weight of it.\n\n" +
+    "Examples of your voice:\n" +
+    "User: I bombed the interview, so I'm a total failure.\n" +
+    "Vault: Ouch. One rough interview and you've already ruled on your entire future. That's all-or-nothing thinking doing a victory lap. You bombed an interview, not your life, and those are very different sizes. Still, you're replaying it for a reason, so something in there stung.\n" +
+    "User: Just tell me what to do about my boss.\n" +
+    "Vault: Nice try. I'm a mirror, not a vending machine, so no plan drops out when you hit the button. Notice you described everything your boss does and nothing about what you want. That's the gap to look at.";
+  const SERIOUS_SUFFIX = "\n\nFor this reply only: the material is heavy. Drop all wit and humor. No concrete action step and no advice. Be serious, plain and gentle, and stay with the weight of it.";
+
+  /* ============ log rendering ============ */
+  function stripTags(s){ const d = document.createElement("div"); d.innerHTML = s; return d.textContent || ""; }
+  function copyText(t, btn){
+    const done = () => { if (btn){ const o = btn.textContent; btn.textContent = "COPIED"; setTimeout(() => btn.textContent = o, 1200); } };
+    const fb = () => {
+      const ta = document.createElement("textarea");
+      ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); }catch(e){}
+      document.body.removeChild(ta); done();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(fb);
+    else fb();
+  }
+  function sysLine(cls, txt){
+    const d = document.createElement("div");
+    d.className = "sysline " + cls; d.textContent = txt;
+    log.insertBefore(d, log.firstChild); log.scrollTop = 0;
+    return d;
+  }
+  function printTurn(user, insight, rawHtml){
+    log.querySelectorAll(".sysline").forEach(el => el.remove());
+    const box = document.createElement("div");
+    box.className = "turn";
+    box.innerHTML =
+      '<button class="copybtn" title="Copy this exchange">COPY</button>' +
+      '<div class="u">' + esc(user) + '</div>' +
+      '<div class="a">' + (rawHtml ? insight : esc(insight)) + '</div>';
+    const plainInsight = rawHtml ? stripTags(insight) : insight;
+    box.querySelector(".copybtn").addEventListener("click", (e) => {
+      copyText("YOU: " + user + "\n\nVAULT:\n" + plainInsight, e.target);
+    });
+    log.insertBefore(box, log.firstChild); log.scrollTop = 0;
+  }
+  function baseline(){
+    log.innerHTML = "";
+    sysLine("hello", "Hello, how are you?");
+    sysLine("ready", "SYSTEM READY. VAULT ACTIVE.");
+  }
+
+  /* ============ thinking animation: tiers light in sequence,
+       rotating status lines, honest seconds counter ============ */
+  const THINK_PHRASES = ["POLISHING THE MIRROR","LOOKING PAST THE STORY","FINDING THE LOOP",
+    "NO SUGAR BEING ADDED","WEIGHING THE WORDS","SITTING WITH IT"];
+  let thinkTimer = null, thinkLine = null;
+  function startThinking(){
+    $("hero").classList.add("thinking");
+    thinkLine = sysLine("think", THINK_PHRASES[0] + " · 0s");
+    const t0 = Date.now(); let pi = 0, lastS = -1;
+    thinkTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      if (s !== lastS){
+        lastS = s;
+        if (s > 0 && s % 3 === 0) pi = Math.min(pi + 1, THINK_PHRASES.length - 1);
+      }
+      if (thinkLine) thinkLine.textContent = THINK_PHRASES[pi] + " · " + s + "s";
+    }, 500);
+  }
+  function stopThinking(){
+    $("hero").classList.remove("thinking");
+    if (thinkTimer) clearInterval(thinkTimer); thinkTimer = null;
+    if (thinkLine) thinkLine.remove(); thinkLine = null;
+  }
+
+  /* ============ speech ============ */
+  const VOICE_PATS = {
+    m: [/david/i, /daniel/i, /george/i, /alex/i, /ryan/i, /guy/i, /christopher/i, /fred/i, /james/i],
+    f: [/zira/i, /samantha/i, /aria/i, /jenny/i, /fiona/i, /moira/i, /karen/i, /tessa/i, /michelle/i, /female/i]
+  };
+  function pickVoice(){
+    let vs = [];
+    try{ vs = speechSynthesis.getVoices(); }catch(e){}
+    if (!vs.length) return null;
+    const en = vs.filter(v => (v.lang||"").toLowerCase().startsWith("en"));
+    const pool = en.length ? en : vs;
+    for (const pat of VOICE_PATS[voicePref]){
+      const v = pool.find(v => pat.test(v.name));
+      if (v) return v;
+    }
+    if (voicePref === "m"){
+      const v = pool.find(v => /male/i.test(v.name) && !/female/i.test(v.name));
+      if (v) return v;
+    }
+    return pool[0] || null;
+  }
+  function speak(text){
+    if (!audioOn) return;
+    setTimeout(function(){
+      try{
+        if (!("speechSynthesis" in window)) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = speedVal; u.pitch = 1.0;
+        const vv = pickVoice();
+        if (vv) u.voice = vv;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch(e){}
+    }, 60);
+  }
+
+  /* ============ engines: two, picked automatically ============
+     gpu — WebLLM with a ~1B model; needs WebGPU.
+     cpu — transformers.js on WASM with a sub-1B model; runs nearly anywhere.
+     dev — hidden bench hook only: #dev=http://localhost:1234 (LM Studio).
+           No UI, not a product feature.
+     iPhones and low-memory devices start on cpu — a big model can crash
+     the tab there. TRY FASTER (settings) attempts the gpu engine.
+     Both libraries are pinned to exact versions and loaded from the copies
+     hosted beside this page; if the local copy can't load (e.g. the file
+     was opened straight from disk), the same pinned version is fetched. */
+  const WEBLLM_LOCAL  = "./lib/web-llm.js";
+  const WEBLLM_PINNED = "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.86/lib/index.js";
+  const TF_LOCAL      = "./lib/transformers.web.min.js";
+  const TF_PINNED     = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1/dist/transformers.web.min.js";
+  const ORT_LOCAL     = "./lib/";
+  const ORT_PINNED    = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.0-dev.20260914-8d85527a0/dist/";
+  const GPU_MODELS = ["Llama-3.2-1B-Instruct-q4f16_1-MLC", "Qwen2.5-0.5B-Instruct-q4f16_1-MLC"];
+  let GPU_SIZE = "about 800 MB";
+  const CPU_MODEL = "onnx-community/Qwen2.5-0.5B-Instruct";
+  const CPU_SIZE = "about 400 MB";
+
+  const devMatch = /#dev=([^&\s]+)/.exec(location.hash || "");
+  const DEV_URL = devMatch ? decodeURIComponent(devMatch[1]).replace(/\/+$/, "") : null;
+
+  /* Bench model hook: #model=3b (or hermes / llama3b / 1b / any MLC model
+     id) makes the GPU engine load that model instead — so the voice can be
+     tested on a PC with a bigger model, the way the earlier versions ran.
+     Hidden, no UI; the shipped defaults are untouched without the hash. */
+  const MODEL_PRESETS = { "3b": "Hermes-3-Llama-3.2-3B-q4f16_1-MLC",
+    "hermes": "Hermes-3-Llama-3.2-3B-q4f16_1-MLC",
+    "llama3b": "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+    "1b": "Llama-3.2-1B-Instruct-q4f16_1-MLC" };
+  const modelMatch = /#model=([^&\s]+)/.exec(location.hash || "");
+  const BENCH_MODEL = modelMatch
+    ? (MODEL_PRESETS[decodeURIComponent(modelMatch[1]).toLowerCase()] || decodeURIComponent(modelMatch[1]))
+    : null;
+  if (BENCH_MODEL){
+    GPU_MODELS.splice(0, GPU_MODELS.length, BENCH_MODEL);
+    if (/3b/i.test(BENCH_MODEL)) GPU_SIZE = "about 2 GB";
+  }
+
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (ua.indexOf("Macintosh") !== -1 && "ontouchstart" in window);
+  const lowMem = !!(navigator.deviceMemory && navigator.deviceMemory <= 4);
+  const hasGPU = !!navigator.gpu;
+
+  let active = null;            /* {chat, model} once an engine is live */
+  let engineKind = null;
+  let engineModel = "";
+  let engineLoading = null;     /* in-flight promise — RESET on failure, so retries really retry */
+  let loadingKind = null;
+  const failedKinds = {};
+  let downloadApproved = false;
+
+  function defaultKind(){
+    if (DEV_URL) return "dev";
+    if (BENCH_MODEL) return "gpu";
+    if (isIOS || lowMem || !hasGPU) return "cpu";
+    return "gpu";
+  }
+  function engineReport(){
+    const el = $("engineReport");
+    if (el){
+      if (engineKind) el.textContent = "ENGINE: " + engineKind.toUpperCase() + " · " + engineModel + " · running on this device.";
+      else if (loadingKind) el.textContent = "ENGINE: loading the " + loadingKind.toUpperCase() + " engine...";
+      else el.textContent = "ENGINE: not loaded yet. This device will start on the " + defaultKind().toUpperCase() + " engine.";
+    }
+    const fb = $("fasterBtn");
+    if (fb){
+      const cur = engineKind || defaultKind();
+      fb.style.display = (cur === "cpu" && hasGPU && !failedKinds.gpu && !DEV_URL) ? "" : "none";
+      fb.textContent = "TRY FASTER ENGINE (" + GPU_SIZE + ")";
+    }
+  }
+
+  /* The one-time download gate: real size shown, Wi-Fi recommended. */
+  function askDownload(kind){
+    return new Promise(res => {
+      if (downloadApproved || kind === "dev"){ res(true); return; }
+      const size = kind === "gpu" ? GPU_SIZE : CPU_SIZE;
+      const box = document.createElement("div");
+      box.className = "turn gate";
+      box.innerHTML = '<div class="a">Before the mirror can think, its mind downloads once — ' + size +
+        '. It stays in your browser afterwards, so this happens one time only.\n\nWi-Fi recommended.\nYour words never leave this device, before or after the download.</div>' +
+        '<div class="gatebtns"><button class="gstart">START DOWNLOAD</button><button class="gno">NOT NOW</button></div>';
+      log.insertBefore(box, log.firstChild); log.scrollTop = 0;
+      box.querySelector(".gstart").addEventListener("click", () => { downloadApproved = true; box.remove(); res(true); });
+      box.querySelector(".gno").addEventListener("click", () => { box.remove(); res(false); });
+    });
+  }
+
+  async function loadGPU(onPct){
+    let webllm = null;
+    try{ webllm = await import(WEBLLM_LOCAL); }
+    catch(e1){ webllm = await import(WEBLLM_PINNED); }
+    let lastErr = null;
+    for (const m of GPU_MODELS){
+      try{
+        const eng = await webllm.CreateMLCEngine(m, {
+          logLevel: "WARN",
+          initProgressCallback: (p) => { if (onPct) onPct(Math.round((p.progress || 0) * 100)); }
+        });
+        return { model: m.split("-q4f16")[0], chat: async (msgs, temp) => {
+          const out = await eng.chat.completions.create({
+            messages: msgs, temperature: temp, repetition_penalty: 1.1, stream: false
+          });
+          return out.choices[0].message.content.trim();
+        }};
+      }catch(e){ lastErr = e; }
+    }
+    throw lastErr;
+  }
+
+  async function loadCPU(onPct){
+    let tf = null, localLib = true;
+    try{ tf = await import(TF_LOCAL); }
+    catch(e1){ localLib = false; tf = await import(TF_PINNED); }
+    try{
+      tf.env.allowLocalModels = false;
+      tf.env.backends.onnx.wasm.wasmPaths = localLib ? ORT_LOCAL : ORT_PINNED;
+    }catch(e){}
+    const gen = await tf.pipeline("text-generation", CPU_MODEL, {
+      dtype: "q4",
+      progress_callback: (p) => {
+        if (onPct && p && p.status === "progress" && p.total) onPct(Math.round(100 * p.loaded / p.total));
+      }
+    });
+    const tok = gen.tokenizer;
+    return { model: "Qwen2.5-0.5B (CPU)", chat: async (msgs, temp) => {
+      const prompt = tok.apply_chat_template(msgs, {tokenize: false, add_generation_prompt: true});
+      const out = await gen(prompt, {max_new_tokens: 240, temperature: temp, do_sample: true, repetition_penalty: 1.1});
+      let txt = (out && out[0] && out[0].generated_text) || "";
+      if (txt.indexOf(prompt) === 0) txt = txt.slice(prompt.length);
+      return txt.trim();
+    }};
+  }
+
+  async function loadDev(){
+    return { model: "dev server", chat: async (msgs, temp) => {
+      const r = await fetch(DEV_URL + "/chat/completions", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({model: "local-model", messages: msgs, temperature: temp})
+      });
+      if (!r.ok) throw new Error("dev server answered " + r.status);
+      const j = await r.json();
+      return j.choices[0].message.content.trim();
+    }};
+  }
+
+  async function ensureEngine(wantKind){
+    if (active && (!wantKind || wantKind === engineKind)) return active;
+    const kind = wantKind || engineKind || defaultKind();
+    if (engineLoading && loadingKind === kind) return engineLoading;
+    loadingKind = kind; engineReport();
+    engineLoading = (async () => {
+      const ok = await askDownload(kind);
+      if (!ok) throw new Error("gate-declined");
+      $("nodeLabel").textContent = "LOADING MIND... 0%";
+      const onPct = (p) => { $("nodeLabel").textContent = "LOADING MIND... " + p + "%"; };
+      const res = kind === "gpu" ? await loadGPU(onPct)
+               : kind === "cpu" ? await loadCPU(onPct)
+               : await loadDev();
+      active = res; engineKind = kind; engineModel = res.model;
+      loadingKind = null; engineReport();
+      return res;
+    })();
+    try{ return await engineLoading; }
+    catch(e){ engineLoading = null; loadingKind = null; engineReport(); throw e; }
+  }
+
+  async function askMind(msgs, temp){
+    const firstKind = engineKind || defaultKind();
+    try{
+      const eng = await ensureEngine();
+      return await eng.chat(msgs, temp);
+    }catch(e1){
+      if (e1 && e1.message === "gate-declined") throw e1;
+      failedKinds[firstKind] = true;
+      active = null; engineKind = null; engineModel = "";
+      const other = firstKind === "gpu" ? "cpu"
+                  : firstKind === "cpu" ? (hasGPU ? "gpu" : null)
+                  : null;
+      if (!other || failedKinds[other]) throw e1;
+      sysLine("dl", "That engine couldn't start here — trying the other one.");
+      const eng2 = await ensureEngine(other);
+      return await eng2.chat(msgs, temp);
+    }
+  }
+
+  /* ============ transmit ============ */
+  function setBusy(b, label){
+    busy = b; goBtn.disabled = b;
+    goBtn.textContent = b ? (label || "WORKING...") : "SEND";
+  }
+  function trimHistory(){
+    while (rounds.length > 5) rounds.shift();
+    const total = () => rounds.reduce((a, r) => a + r.user.length + r.insight.length, 0);
+    while (rounds.length > 1 && total() > 6000) rounds.shift();
+  }
+  async function transmit(){
+    if (busy) return;
+    const text = input.value.trim();
+    if (!text) return;
+    const low = text.toLowerCase();
+
+    if (crisisHit(low)){
+      printTurn(text, CRISIS_HTML, true);
+      speak(CRISIS_TEXT);
+      input.value = "";
+      return;
+    }
+    if (isRomance(low)){
+      printTurn(text, ROMANCE_TEXT);
+      input.value = "";
+      return;
+    }
+
+    const ideation = ideationHit(low);
+    const serious = ideation || heavyHit(low);
+    const sys = SHARP_SYS + (serious ? SERIOUS_SUFFIX : "");
+    const msgs = [{role: "system", content: sys}];
+    rounds.forEach(r => {
+      msgs.push({role: "user", content: r.user});
+      msgs.push({role: "assistant", content: r.insight});
+    });
+    msgs.push({role: "user", content: text});
+
+    setBusy(true);
+    startThinking();
+    try{
+      const insightRaw = await askMind(msgs, 0.7);
+      const insight = insightRaw.split(/\n{2,}/).map(par =>
+        par.replace(/^\s*(mirror|the mirror|distortion|the distortion|cognitive trap|the trap|trap|reframe|the reframe|concrete action|actionable|the action)\s*[:\u2014-]\s*/i, '')
+      ).join("\n\n").trim();
+      stopThinking();
+      if (ideation) printTurn(text, esc(insight) + "<br><br>" + NUMBERS_STD, true);
+      else printTurn(text, insight);
+      speak(insight);
+      rounds.push({user: text, insight: insight});
+      trimHistory();
+      input.value = "";
+      $("nodeLabel").textContent = "MIND: " + (engineModel || "READY");
+    }catch(err){
+      stopThinking();
+      if (err && err.message === "gate-declined"){
+        sysLine("dl", "Mind not loaded — tap SEND when you're ready to download it.");
+      } else {
+        printTurn(text, "The mirror's mind can't run on this device — the download may have been interrupted, or this browser doesn't support either engine. Nothing you wrote was sent or saved anywhere. TAKE FIVE still works, and the numbers in settings are real people.");
+        $("nodeLabel").textContent = "MIND: CAN'T RUN HERE";
+      }
+    }
+    setBusy(false);
+  }
+
+  /* ============ purge: one press. The words go; the model stays loaded. ============ */
+  function kill(){
+    rounds = [];
+    input.value = "";
+    try{ speechSynthesis.cancel(); }catch(e){}
+    baseline();
+    $("nodeLabel").textContent = engineKind ? "MIND: " + engineModel : "MIND: NOT LOADED";
+    const f = $("flash");
+    f.classList.add("show");
+    setTimeout(() => f.classList.remove("show"), 900);
+  }
+
+  /* ============ guided exercises (TAKE FIVE) ============ */
+  const GUIDES = {
+    breath: [
+      ["Get comfortable. Let your shoulders drop.", 2500],
+      ["Breathe in through your nose.", 4000],
+      ["Hold.", 4000],
+      ["And let it go — slow, through your mouth.", 6000],
+      ["Again. In through the nose.", 4000],
+      ["Hold.", 4000],
+      ["Let it all go.", 6000],
+      ["One more, at your own pace. I'll wait.", 7000],
+      ["Good. You're here.", 0]
+    ],
+    scan: [
+      ["Close your eyes if you want. Start with your feet.", 4000],
+      ["Feel the weight of them. The floor underneath.", 5500],
+      ["Move up to your legs. Notice any tightness — don't fix it, just notice.", 5500],
+      ["Your hips. Let them be heavy.", 5500],
+      ["Your belly. Let it rise and fall on its own.", 5500],
+      ["Your chest. Give it room.", 5500],
+      ["Your hands. Uncurl the fingers.", 5500],
+      ["Your shoulders. Drop them an inch.", 5500],
+      ["Your jaw. Let it hang loose.", 5500],
+      ["The top of your head. That's the whole scan.", 3500],
+      ["When you're ready, open your eyes.", 0]
+    ]
+  };
+  let guideRunning = false, guideTimers = [];
+  function stopGuide(){
+    guideRunning = false;
+    guideTimers.forEach(clearTimeout); guideTimers = [];
+    try{ speechSynthesis.cancel(); }catch(e){}
+  }
+  function startGuide(kind){
+    stopGuide();
+    guideRunning = true;
+    log.querySelectorAll(".sysline").forEach(el => el.remove());
+    const box = document.createElement("div");
+    box.className = "turn guide";
+    box.innerHTML = '<button class="copybtn" title="Stop the guide">STOP</button>' +
+      '<div class="u">GUIDED &middot; ' + (kind === "breath" ? "SLOW BREATHING" : "BODY SCAN") + '</div>' +
+      '<div class="a guidelines"></div>';
+    box.querySelector(".copybtn").addEventListener("click", () => { stopGuide(); });
+    log.insertBefore(box, log.firstChild); log.scrollTop = 0;
+    const lines = box.querySelector(".guidelines");
+    const steps = GUIDES[kind];
+    let i = 0;
+    function next(){
+      if (!guideRunning) return;
+      if (i >= steps.length){ guideRunning = false; return; }
+      const txt = steps[i][0], pause = steps[i][1]; i++;
+      const d = document.createElement("div");
+      d.className = "gline"; d.textContent = txt;
+      lines.appendChild(d); log.scrollTop = 0;
+      const after = () => { if (guideRunning) guideTimers.push(setTimeout(next, pause)); };
+      if (audioOn && "speechSynthesis" in window){
+        try{
+          const u = new SpeechSynthesisUtterance(txt);
+          const vv = pickVoice(); if (vv) u.voice = vv;
+          u.rate = Math.min(speedVal, 0.8);
+          u.onend = after; u.onerror = after;
+          speechSynthesis.cancel(); speechSynthesis.speak(u);
+        }catch(e){ after(); }
+      } else after();
+    }
+    next();
+  }
+
+  document.querySelectorAll("#guideSeg button").forEach(b => b.addEventListener("click", () => {
+    $("fiveCard").classList.remove("open");
+    startGuide(b.dataset.guide);
+  }));
+  $("fiveBtn").addEventListener("click", () => $("fiveCard").classList.toggle("open"));
+  $("fiveClose").addEventListener("click", () => $("fiveCard").classList.remove("open"));
+
+  /* ============ rotating provocative placeholders ============ */
+  const placeholders = [
+    "Drop the raw, unfiltered thoughts here without second-guessing...",
+    "What is the lie you tell yourself the most?",
+    "What did you pretend not to notice today?",
+    "What's the thing you'd never say out loud?",
+    "What's been circling your head all day?",
+    "What are you avoiding right now?"
+  ];
+  let phIdx = 0;
+  setInterval(() => {
+    if (document.activeElement === input || input.value) return;
+    phIdx = (phIdx + 1) % placeholders.length;
+    input.placeholder = placeholders[phIdx];
+  }, 6000);
+
+  /* ============ sample questions ============ */
+  const samples = [
+    "What do I actually have control over right now, and what am I just pretending I can control?",
+    "If my closest friend was sitting here, what would I finally admit out loud?",
+    "What is the single most important physical or mental step I can take this week to feel more in control?",
+    "What am I avoiding by staying busy, and what would happen if I stopped for 10 minutes?",
+    "What is the lie I tell myself the most?",
+    "Be honest: how much of my personality is just trauma with good lighting?",
+    "If my life had a comment section, what would the top comment say?",
+    "What am I romanticizing that's actually just a red flag with better PR?",
+    "If my intrusive thoughts had a podcast, what would this week's episode be called?",
+    "What's the delulu I've been mainlining this week?"
+  ];
+  let sampleIdx = 0;
+  $("sampleBtn").addEventListener("click", () => {
+    input.value = samples[sampleIdx];
+    sampleIdx = (sampleIdx + 1) % samples.length;
+    input.focus();
+  });
+
+  /* ============ wiring ============ */
+  goBtn.addEventListener("click", transmit);
+  input.addEventListener("keydown", e => {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+    if (coarse) return;   /* touch screens: Enter makes a new line */
+    e.preventDefault(); transmit();
+  });
+  $("killBtn").addEventListener("click", kill);
+  $("gearBtn").addEventListener("click", () => $("drawer").classList.toggle("open"));
+  $("muteBtn").addEventListener("click", (e) => {
+    audioOn = !audioOn;
+    const b = e.currentTarget;
+    b.textContent = audioOn ? "AUDIO: ON" : "AUDIO: OFF";
+    b.classList.toggle("on", audioOn);
+    if (!audioOn){ try{ speechSynthesis.cancel(); }catch(e){} }
+    else speak("Audio on.");
+  });
+  document.querySelectorAll("#genderSeg button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("#genderSeg button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    voicePref = b.dataset.g;
+    if (audioOn) speak(voicePref === "m" ? "Male voice." : "Female voice.");
+  }));
+  $("speedRng").addEventListener("input", (e) => {
+    speedVal = +e.target.value;
+    $("speedVal").innerHTML = speedVal.toFixed(2) + "&times;";
+  });
+  $("speedRng").addEventListener("change", () => { if (audioOn) speak("Speed check."); });
+  $("fasterBtn").addEventListener("click", async () => {
+    if (busy) return;
+    setBusy(true, "LOADING...");
+    try{
+      await ensureEngine("gpu");
+      $("nodeLabel").textContent = "MIND: " + engineModel;
+      sysLine("ready", "FASTER ENGINE RUNNING.");
+    }catch(e){
+      if (!(e && e.message === "gate-declined")) failedKinds.gpu = true;
+      sysLine("dl", "The faster engine couldn't start on this device — staying with the standard one.");
+    }
+    engineReport();
+    setBusy(false);
+  });
+
+  baseline();
+  engineReport();
+})();
+</script>
+</body>
+</html>
