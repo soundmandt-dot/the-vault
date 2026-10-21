@@ -28,8 +28,11 @@ phones anyone. Open it like a game. Leave whenever. It keeps nothing.
 - One HTML file plus a `lib/` folder. No build step, no framework.
 - Two on-device engines, picked automatically:
   - **GPU (WebGPU):** Llama 3.2 1B via WebLLM.
-  - **CPU fallback:** Qwen 2.5 0.5B via Transformers.js / ONNX.
-- First load downloads the model once (~800 MB GPU / ~400 MB CPU — use
+  - **CPU fallback:** Llama 3.2 1B via Transformers.js / ONNX — the same
+    mind as the GPU engine, just slower. (An earlier 0.5B fallback model
+    answered everything with a refusal and was removed 2026-10-21; Llama
+    is the floor on every device.)
+- First load downloads the model once (~800 MB GPU / ~1.1 GB CPU — use
   Wi-Fi). After that, the model is cached on the device.
 - The library files load locally first, with a pinned CDN fallback.
 - Conversation memory is five exchanges, held in RAM only, trimmed as it
