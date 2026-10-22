@@ -210,8 +210,8 @@
       <b style="color:var(--text)">The Vault is a mirror, not a mind reader</b> — built for reflection
       and a little entertainment, not therapy or advice. Your words stay on this device: they are never
       stored, never sent anywhere, and there is no account. The mirror&apos;s mind is a small model that
-      downloads once — a few hundred megabytes — and stays in your browser&apos;s cache, so after the
-      first download the Vault works offline. On iPhone, use <b style="color:var(--text)">Add to Home Screen</b>
+      downloads — a few hundred megabytes — and stays in your browser&apos;s cache, so after the
+      first download the Vault works offline. Browsers sometimes clear that cache without asking — if yours does, the model downloads again, and it&apos;s quick. On iPhone, use <b style="color:var(--text)">Add to Home Screen</b>
       so the download isn&apos;t cleared away. Hit <b style="color:var(--danger)">PURGE</b> (top) or close
       the tab and everything you said is gone.
     </div>
@@ -535,15 +535,15 @@
     }
   }
 
-  /* The one-time download gate: real size shown, Wi-Fi recommended. */
+  /* The download gate: real size shown, Wi-Fi recommended. Copy is honest that browsers may evict the cache. */
   function askDownload(kind){
     return new Promise(res => {
       if (downloadApproved || kind === "dev"){ res(true); return; }
       const size = kind === "gpu" ? GPU_SIZE : CPU_SIZE;
       const box = document.createElement("div");
       box.className = "turn gate";
-      box.innerHTML = '<div class="a">Before the mirror can think, its mind downloads once — ' + size +
-        '. It stays in your browser afterwards, so this happens one time only.\n\nWi-Fi recommended.\nYour words never leave this device, before or after the download.</div>' +
+      box.innerHTML = '<div class="a">Before the mirror can think, its mind downloads — ' + size +
+        '. It stays in your browser afterwards, so normally this happens once. If your browser clears its storage — phones do, without asking — it fetches it again. It is quick.\n\nWi-Fi recommended.\nYour words never leave this device, before or after the download.</div>' +
         '<div class="gatebtns"><button class="gstart">START DOWNLOAD</button><button class="gno">NOT NOW</button></div>';
       log.insertBefore(box, log.firstChild); log.scrollTop = 0;
       box.querySelector(".gstart").addEventListener("click", () => { downloadApproved = true; box.remove(); res(true); });
