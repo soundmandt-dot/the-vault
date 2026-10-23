@@ -66,9 +66,15 @@ a link to this section.
   (`python3 -m http.server` works) over https or localhost. Opening the
   file directly works, but the browser can't keep the model cached for
   next time.
-- **Offline, honestly:** the *model* works offline once downloaded. The
-  *page* is not yet cached for offline revisits — a service worker is an
-  open task below.
+- **Offline, honestly:** the first service-worker installation must finish
+  online over HTTPS or localhost. It caches the page and the four checked-in
+  `lib/` files for offline revisits (both the directory URL and `index.html`). The
+  model still needs its separate, existing download/cache; the worker does
+  not download or cache models, conversations, or anything you type. If the
+  browser blocks workers/storage or evicts either cache, reconnect to restore
+  it. Opening `index.html` as a local file does not install the worker.
+  The shell was checked in local Chrome; model inference, native installation
+  and iOS offline behavior were not tested.
 
 ## Contributing — doors are open
 
@@ -83,14 +89,27 @@ This project is meant to outlive its author. Help wanted, in rough order:
    (they're jurisdiction-specific, not language-specific). Spanish is
    the natural first language. If you speak it and you get this
    paragraph, you're who we're waiting for.
-2. **Service worker** so the page itself survives offline, completing
-   the offline promise.
+2. **Offline shell testing** across browsers and devices. The service
+   worker caches only public shell files; model caching stays separate.
 3. **Matcher test batteries** — more cases: other keyboards, other
    phrasings, more denial shapes. Break the net in a test before life
    does.
 4. **Accessibility and small-screen polish.**
 
 Small, tested PRs. Keep the doctrine. Keep it one file.
+
+## Check the offline shell
+
+Run the dependency-free worker tests with Node.js 20 or newer:
+
+```sh
+node --test tests/offline.test.cjs
+```
+
+After changing `index.html` or a bundled library, bump the cache version in
+`sw.js`. Updates wait until all existing Vault tabs close, so a live session
+keeps its current shell. A failed installation leaves the previous worker
+active. The worker never adds network responses to the cache at runtime.
 
 ## License
 

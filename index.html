@@ -885,5 +885,13 @@
   engineReport();
 })();
 </script>
+<script>
+// Shell caching is optional; unsupported/blocked workers leave the online app usable.
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {});
+  });
+}
+</script>
 </body>
 </html>
